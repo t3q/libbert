@@ -90,7 +90,7 @@ namespace bert {
     boost::uint16_t const len = a.size();
     *i = (byte_t)ATOM_EXT;
     i = detail::set_2byte_size(len, ++i);
-    return std::copy(a.begin(), a.end(), i);
+    return std::copy(a.begin(), --a.end(), i);
   }
 
   template<typename Iterator>
@@ -138,7 +138,7 @@ namespace bert {
     boost::uint16_t const len = s.size();
     *i = STRING_EXT;
     i = detail::set_2byte_size(len, ++i);
-    i = std::copy(s.begin(), s.end(), i);
+    i = std::copy(s.begin(), --s.end(), i);
     return i;
   }
 
