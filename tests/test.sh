@@ -1,4 +1,4 @@
-if [ ! -d ./build ]; then
+if [ ! -d ../build ]; then
     echo "ERROR: ./build directory not found"
     exit 2
 fi
@@ -8,7 +8,7 @@ echo "Test Suite"
 echo
 
 status=0
-for test in ./build/bin/test_*; do
+for test in ../build/bin/test_*; do
     if [ -x "$test" ]; then
         echo "Running Test: $test"
         $test

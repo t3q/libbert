@@ -17,7 +17,7 @@ namespace bert {
   Iterator format_small_integer(byte_t data, Iterator i) {
     *i = (byte_t)SMALL_INTEGER_EXT;
     *++i = data;
-    return i;
+    return ++i;
   }
 
   template<typename Iterator>
@@ -34,7 +34,7 @@ namespace bert {
     *++i = static_cast<byte_t>(data >> 8);
     *++i = static_cast<byte_t>(data);
 #endif
-    return i;
+    return ++i;
   }
 
   template<typename Integer, typename Iterator>
@@ -59,8 +59,10 @@ namespace bert {
   Iterator format_float(real_t data, Iterator i) {
     *i = FLOAT_EXT;
     char buf[32];
+    buf[32] = buf[31] = buf[30] = buf[29] = buf[28]= buf[27] = 0;
     compat::snprintf(buf, 32, "%.20e", data);
-    return std::copy(buf, buf+31, i);
+    i = std::copy(buf, buf+31, ++i);
+    return i;
   }
 
   template<typename Iterator>
@@ -84,20 +86,24 @@ namespace bert {
 
   template<typename Iterator>
   Iterator format_atom(atom_t const &a, Iterator i) {
+    if(a.length() == 0) {
+      throw bert_exception("null atom length");
+    }
     if(a.size() > std::numeric_limits<boost::uint16_t>::max()) {
       throw bert_exception("out of range");
     }
     boost::uint16_t const len = a.size();
     *i = (byte_t)ATOM_EXT;
     i = detail::set_2byte_size(len, ++i);
-    return std::copy(a.begin(), --a.end(), i);
+    i = std::copy(a.begin(), a.end(), i);
+    return i;
   }
 
   template<typename Iterator>
   Iterator format_small_tuple_size(byte_t len, Iterator i) {
     *i = (byte_t)SMALL_TUPLE_EXT;
     *++i = len;
-    return i;
+    return ++i;
   }
 
   namespace detail {
@@ -132,13 +138,16 @@ namespace bert {
 
   template<typename Iterator>
   Iterator format_string(std::string const &s, Iterator i) {
+    if(s.length() == 0) {
+      return format_nil(i);
+    }
     if(s.size() > std::numeric_limits<boost::uint16_t>::max()) {
       throw bert_exception("out of range");
     }
     boost::uint16_t const len = s.size();
     *i = STRING_EXT;
     i = detail::set_2byte_size(len, ++i);
-    i = std::copy(s.begin(), --s.end(), i);
+    i = std::copy(s.begin(), s.end(), i);
     return i;
   }
 
