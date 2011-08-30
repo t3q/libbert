@@ -1,6 +1,9 @@
 #include <bert/value.hpp>
 
 #include <boost/variant.hpp>
+#include <boost/lexical_cast.hpp>
+
+using namespace std;
 
 namespace bert {
   struct value::impl {
@@ -125,5 +128,72 @@ namespace bert {
   binary_t const &value::get_binary() const {
     return boost::get<binary_t>(p->data);
   }
+  std::string value::str() const {
+    switch(p->type) {
+    case SMALL_INTEGER_EXT:
+      return boost::lexical_cast<std::string>(get_small_integer());
+    case INTEGER_EXT:
+      return boost::lexical_cast<std::string>(get_integer());
+#ifndef LIBBERT_NO_EXTENSION
+    case X_NEW_FLOAT_EXT:
+#endif
+    case FLOAT_EXT:
+      return boost::lexical_cast<std::string>(get_float());
+    case ATOM_EXT:
+      return get_atom();
+    case SMALL_TUPLE_EXT: 
+    case LARGE_TUPLE_EXT: {
+      std::string tmp = "{";
+      std::vector<bert::value> t = get_tuple();
+      std::vector<bert::value>::const_iterator i = t.begin();
+      while(i != t.end()) {
+        tmp += (*i++).str();
+        if(i != t.end()) {
+          tmp += ",";
+        }           
+      }
+      tmp += "}";
+      return tmp;
+    }
+    case NIL_EXT:
+      return std::string("[]");
+    case STRING_EXT:
+      return std::string("\"") + get_string() + "\"";
+    case LIST_EXT: {
+      std::string tmp = "[";
+      std::list<bert::value> l = get_list();
+      std::list<bert::value>::const_iterator i = l.begin();
+      while(i != l.end()) {
+        tmp += (*i++).str();
+        if(i != l.end()) {
+          tmp += ",";
+        }           
+      }
+      tmp += "]";
+      return tmp;
+    }
+    case BINARY_EXT: {
+      std::string tmp = "<<";
+      std::vector<byte_t> b = get_binary();
+      std::vector<byte_t>::const_iterator i = b.begin();
+      while(i != b.end()) {
+        tmp += boost::lexical_cast<std::string>((unsigned int)*i++);
+        if(i != b.end()) {
+          tmp += ",";
+        }           
+      }
+      tmp += ">>";
+      return tmp;
+    }
+    case SMALL_BIG_EXT:
+      // TODO implement me
+    case LARGE_BIG_EXT:
+      // TODO implement me
+    default:
+      break;
+    }    
+    return std::string("?");
+  }
+
   value::~value() { }
 }

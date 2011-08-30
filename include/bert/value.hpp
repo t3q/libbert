@@ -44,6 +44,8 @@ namespace bert {
 
     binary_t const &get_binary() const;
 
+    std::string str() const;
+
     value(); // nil
     value(type_t t, byte_t small_int);
     value(type_t t, boost::int32_t integer);
