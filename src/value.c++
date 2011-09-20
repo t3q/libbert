@@ -131,7 +131,7 @@ namespace bert {
   std::string value::str() const {
     switch(p->type) {
     case SMALL_INTEGER_EXT:
-      return boost::lexical_cast<std::string>(get_small_integer());
+      return boost::lexical_cast<std::string>((int)get_small_integer());
     case INTEGER_EXT:
       return boost::lexical_cast<std::string>(get_integer());
 #ifndef LIBBERT_NO_EXTENSION
